@@ -1,0 +1,27 @@
+{{define "title"}} Categoria {{.Category.Name}}{{end}}
+
+{{define "main"}}
+<section class="py-5 text-center container">
+  <div class="row py-lg-5">
+    <div class="col-lg-6 col-md-8 mx-auto">
+      <h1 class="fw-light">{{.Category.Name}}</h1>
+      <p class="lead text-muted">{{.Category.Description}}</p>
+    </div>
+  </div>
+</section>
+
+<div class="album py-5">
+  <div class="container">
+    <h1 class="py-3">{{.Category.ItemsCount}} Items en la categoría {{.Category.Name}}</h1>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+      {{if .Category.Items}}
+        {{range .Category.Items}}
+          {{template "item" .}}
+        {{end}}
+      {{else}}
+        <p>No hay items para mostrar.</p>
+      {{end}}
+    </div>
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,19 @@
+{{define "category"}}
+  <div class="col">
+    <div class="card shadow-sm">
+      <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="30%" y="50%" fill="#eceeef" dy=".3em">Imagen de categoria</text></svg>
+      <div class="card-body">
+        <h5 class="card-title">{{.Name}}</h5>
+        <p class="card-text">{{.Description}}</p>
+        <div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="btn-group">
+              <a href="/category/{{.ID}}" class="btn btn-sm btn-outline-secondary">View</a>
+            </div>
+            <small class="text-body-secondary">{{.ItemsCount}} Items</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{{end}}

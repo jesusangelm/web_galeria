@@ -1,0 +1,23 @@
+{{define "title"}} Item {{.Item.Name}}{{end}}
+
+{{define "main"}}
+  <div class="container">
+    <div class="col-lg-12 py-2">
+      <img class="img-fluid rounded mx-auto d-block" src="{{.Item.ImageURL}}" alt="">
+      <div class="d-flex justify-content-between">
+        <div>
+          <h2>{{.Item.Name}}</h2>
+        </div>
+        <div>
+          <a href="/category/{{.Item.CategoryID}}">
+            <span class="badge bg-secondary">
+              {{.Item.CategoryName}}
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <p>{{.Item.Description}}</p>
+    </div>
+  </div>
+{{end}}

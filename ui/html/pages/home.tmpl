@@ -1,0 +1,27 @@
+{{define "title"}}Inicio{{end}}
+
+{{define "main"}}
+  <section class="py-5 text-center container">
+    <div class="row py-lg-5">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Artesania Sory</h1>
+        <p class="lead text-muted">Manualidades, Tejidos, costura y mucho más...</p>
+      </div>
+    </div>
+  </section>
+  <div class="album py-5">
+    <div class="container">
+      <h1 class="py-3">Categorías de Imágenes.</h1>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        {{if .Categories}}
+          {{range .Categories}}
+            {{template "category" .}}
+          {{end}}
+        {{else}}
+          <p>No hay categorías para mostrar.</p>
+        {{end}}
+      </div>
+    </div>
+  </div>
+
+{{end}}
