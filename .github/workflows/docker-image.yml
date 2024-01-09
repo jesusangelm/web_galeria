@@ -17,5 +17,5 @@ jobs:
     - name: Build and publish the Docker image
       run: |
         docker login --username jesusangelm --password ${{ secrets.GITHUB_TOKEN }} ghcr.io
-        docker build . --file Dockerfile --tag ghcr.io/jesusangelm/web_galeria:$(date +%s)
-        docker push ghcr.io/jesusangelm/web_galeria:$(date +%s)
+        docker build . --file Dockerfile --tag ghcr.io/jesusangelm/web_galeria:$(date)
+        docker push ghcr.io/jesusangelm/web_galeria:$(date)
