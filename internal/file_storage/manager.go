@@ -2,10 +2,12 @@ package filestorage
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -17,6 +19,8 @@ import (
 type S3 struct {
 	Session *session.Session
 	Bucket  string
+	CdnHost string
+	Env     string
 }
 
 type AttachmentInfo struct {
@@ -27,8 +31,8 @@ type AttachmentInfo struct {
 	Location    string
 }
 
-func NewS3Manager(s3 *session.Session, bucket string) S3 {
-	return S3{Session: s3, Bucket: bucket}
+func NewS3Manager(s3 *session.Session, bucket string, env string, cdn_host string) S3 {
+	return S3{Session: s3, Bucket: bucket, CdnHost: cdn_host, Env: env}
 }
 
 func (s *S3) UploaderFile(filePath string) (*AttachmentInfo, error) {
@@ -94,6 +98,11 @@ func (s *S3) GetFileUrl(key string) string {
 	if err != nil {
 		log.Println(err)
 	}
+	bucketEndpoint := fmt.Sprintf("%s.%s", s.Bucket, *s.Session.Config.Endpoint)
 
-	return url
+	if s.Env == "development" {
+		return url
+	} else {
+		return strings.Replace(url, bucketEndpoint, s.CdnHost, 1)
+	}
 }

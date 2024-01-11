@@ -15,7 +15,10 @@ confirm:
 ## run/web: run the cmd/web application
 .PHONY: run/web
 run/web:
-	go run ./cmd/web -env=${ENV} -port=${WEB_PORT} -db-dsn=${DATABASE_URL} -s3_bucket=${S3_BUCKET} -s3_region=${S3_REGION} -s3_endpoint=${S3_ENDPOINT} -s3_akid=${S3_ACCESS_KEY_ID} -s3_sak=${S3_SECRET_ACCESS_KEY}
+	go run ./cmd/web -db-dsn=${DATABASE_URL} \
+	-s3_bucket=${S3_BUCKET} -s3_region=${S3_REGION} -s3_endpoint=${S3_ENDPOINT} \
+	-s3_akid=${S3_ACCESS_KEY_ID} -s3_sak=${S3_SECRET_ACCESS_KEY} \
+	-env=${ENV} -port=${WEB_PORT} -cdn_host=${CDN_HOST}
 
 ## db/psql: connect to the database using psql
 .PHONY: db/psql

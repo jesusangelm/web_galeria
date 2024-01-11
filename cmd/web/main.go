@@ -28,6 +28,7 @@ type config struct {
 		access_key_id     string
 		secret_access_key string
 	}
+	cdn_host string
 }
 
 type application struct {
@@ -55,6 +56,7 @@ func main() {
 	flag.StringVar(&cfg.s3.endpoint, "s3_endpoint", "", "S3 Endpoint")
 	flag.StringVar(&cfg.s3.access_key_id, "s3_akid", "", "S3 Access Key ID")
 	flag.StringVar(&cfg.s3.secret_access_key, "s3_sak", "", "S3 Secret Access Key")
+	flag.StringVar(&cfg.cdn_host, "cdn_host", "", "CDN Host")
 	flag.Parse()
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
@@ -85,7 +87,7 @@ func main() {
 		logger.PrintFatal(err, nil)
 	}
 
-	s3Manager := filestorage.NewS3Manager(s3Session, cfg.s3.bucket)
+	s3Manager := filestorage.NewS3Manager(s3Session, cfg.s3.bucket, cfg.env, cfg.cdn_host)
 
 	// Initialize the application struct
 	// for application config
