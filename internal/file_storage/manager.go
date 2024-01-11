@@ -17,10 +17,10 @@ import (
 )
 
 type S3 struct {
-	Session *session.Session
-	Bucket  string
-	CdnHost string
-	Env     string
+	Session   *session.Session
+	Bucket    string
+	CdnHost   string
+	EnableCdn bool
 }
 
 type AttachmentInfo struct {
@@ -31,8 +31,8 @@ type AttachmentInfo struct {
 	Location    string
 }
 
-func NewS3Manager(s3 *session.Session, bucket string, env string, cdn_host string) S3 {
-	return S3{Session: s3, Bucket: bucket, CdnHost: cdn_host, Env: env}
+func NewS3Manager(s3 *session.Session, bucket string, enable_cdn bool, cdn_host string) S3 {
+	return S3{Session: s3, Bucket: bucket, CdnHost: cdn_host, EnableCdn: enable_cdn}
 }
 
 func (s *S3) UploaderFile(filePath string) (*AttachmentInfo, error) {
@@ -100,9 +100,9 @@ func (s *S3) GetFileUrl(key string) string {
 	}
 	bucketEndpoint := fmt.Sprintf("%s.%s", s.Bucket, *s.Session.Config.Endpoint)
 
-	if s.Env == "development" {
-		return url
-	} else {
+	if s.EnableCdn {
 		return strings.Replace(url, bucketEndpoint, s.CdnHost, 1)
+	} else {
+		return url
 	}
 }
