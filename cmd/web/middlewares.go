@@ -8,8 +8,13 @@ import (
 // set some basic security headers for all request
 func (app *application) secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy",
-			fmt.Sprintf("default-src 'self'; img-src %s.%s %s; style-src 'self'", app.config.s3.bucket, app.config.s3.endpoint, app.config.cdn_host))
+		if app.config.enable_cdn {
+			w.Header().Set("Content-Security-Policy",
+				fmt.Sprintf("default-src 'self'; img-src %s; style-src 'self'", app.config.cdn_host))
+		} else {
+			w.Header().Set("Content-Security-Policy",
+				fmt.Sprintf("default-src 'self'; img-src %s.%s; style-src 'self'", app.config.s3.bucket, app.config.s3.endpoint))
+		}
 
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
 		w.Header().Set("X-Content-Type-Options", "nosniff")

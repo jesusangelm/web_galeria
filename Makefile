@@ -18,7 +18,7 @@ run/web:
 	go run ./cmd/web -db-dsn=${DATABASE_URL} \
 	-s3_bucket=${S3_BUCKET} -s3_region=${S3_REGION} -s3_endpoint=${S3_ENDPOINT} \
 	-s3_akid=${S3_ACCESS_KEY_ID} -s3_sak=${S3_SECRET_ACCESS_KEY} \
-	-env=${ENV} -port=${WEB_PORT} -cdn_host=${CDN_HOST}
+	-env=${ENV} -port=${WEB_PORT} -cdn_host=${CDN_HOST} -enable_cdn=${ENABLE_CDN}
 
 ## db/psql: connect to the database using psql
 .PHONY: db/psql
@@ -67,10 +67,10 @@ container/pod/create:
 container/run/web:
 	@echo 'Running a container of the web Application'
 	podman run -d --pod webgaleria --restart=unless-stopped \
-	--name web_galeria localhost/web_galeria -db-dsn=${DATABASE_URL} \
+	--name web_galeria ghcr.io/jesusangelm/web_galeria -db-dsn=${DATABASE_URL} \
 	-s3_bucket=${S3_BUCKET} -s3_region=${S3_REGION} -s3_endpoint=${S3_ENDPOINT} \
 	-s3_akid=${S3_ACCESS_KEY_ID} -s3_sak=${S3_SECRET_ACCESS_KEY} \
-	-env=${ENV} -port=${WEB_PORT}
+	-env=${ENV} -port=${WEB_PORT} -cdn_host=${CDN_HOST} -enable_cdn=${ENABLE_CDN}
 
 ################ DEPLOY #################################
 ## web_galeria/build: build images/network/volume/pod neccesary for galeria app
