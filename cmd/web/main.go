@@ -5,10 +5,7 @@ import (
 	"html/template"
 	"os"
 	"sync"
-	"time"
 
-	"github.com/alexedwards/scs/pgxstore"
-	"github.com/alexedwards/scs/v2"
 	"jesusmarin.dev/galeria/internal/data"
 	filestorage "jesusmarin.dev/galeria/internal/file_storage"
 	"jesusmarin.dev/galeria/internal/jsonlog"
@@ -33,13 +30,12 @@ type config struct {
 }
 
 type application struct {
-	config         config
-	logger         *jsonlog.Logger
-	templateCache  map[string]*template.Template
-	sessionManager *scs.SessionManager
-	models         data.Models
-	s3Manager      filestorage.S3
-	wg             sync.WaitGroup
+	config        config
+	logger        *jsonlog.Logger
+	templateCache map[string]*template.Template
+	models        data.Models
+	s3Manager     filestorage.S3
+	wg            sync.WaitGroup
 }
 
 func main() {
@@ -72,12 +68,6 @@ func main() {
 	defer dbConn.Close()
 	logger.PrintInfo("database connection pool established", nil)
 
-	// use a SessionManager for session manage and storage
-	// in the PostgreSQL DB
-	sessionManager := scs.New()
-	sessionManager.Store = pgxstore.New(dbConn)
-	sessionManager.Lifetime = 12 * time.Hour
-
 	// Initialize a new template cache...
 	templateCache, err := newTemplateCache()
 	if err != nil {
@@ -94,12 +84,11 @@ func main() {
 	// Initialize the application struct
 	// for application config
 	app := application{
-		config:         cfg,
-		logger:         logger,
-		templateCache:  templateCache,
-		sessionManager: sessionManager,
-		models:         data.NewModels(dbConn, s3Manager),
-		s3Manager:      s3Manager,
+		config:        cfg,
+		logger:        logger,
+		templateCache: templateCache,
+		models:        data.NewModels(dbConn, s3Manager),
+		s3Manager:     s3Manager,
 	}
 
 	// call app.serve() to start the server

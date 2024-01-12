@@ -14,7 +14,6 @@ import (
 // any dynamic data that we want to pass to our HTML templates.
 type templateData struct {
 	CurrentYear int
-	Flash       string
 	Category    *data.Category
 	Categories  []*data.Category
 	Item        *data.Item

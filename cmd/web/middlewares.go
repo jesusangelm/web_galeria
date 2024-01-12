@@ -13,7 +13,7 @@ func (app *application) secureHeaders(next http.Handler) http.Handler {
 				fmt.Sprintf("default-src 'self'; img-src %s; style-src 'self'", app.config.cdn_host))
 		} else {
 			w.Header().Set("Content-Security-Policy",
-				fmt.Sprintf("default-src 'self'; img-src %s.%s; style-src 'self'", app.config.s3.bucket, app.config.s3.endpoint))
+				fmt.Sprintf("default-src 'self'; img-src '%s'; style-src 'self'", "self"))
 		}
 
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
