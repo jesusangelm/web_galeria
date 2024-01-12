@@ -17,13 +17,12 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.FS(ui.Files))
 	// define the path for the fileserver
 	router.Handler(http.MethodGet, "/static/*filepath", fileServer)
-
-	dynamic := alice.New(app.sessionManager.LoadAndSave)
+	router.HandlerFunc(http.MethodGet, "/images/:key", app.images)
 
 	// Routes definition
-	router.Handler(http.MethodGet, "/", dynamic.ThenFunc(app.home))
-	router.Handler(http.MethodGet, "/category/:id", dynamic.ThenFunc(app.categoryShow))
-	router.Handler(http.MethodGet, "/item/:id", dynamic.ThenFunc(app.itemShow))
+	router.HandlerFunc(http.MethodGet, "/", app.home)
+	router.HandlerFunc(http.MethodGet, "/category/:id", app.categoryShow)
+	router.HandlerFunc(http.MethodGet, "/item/:id", app.itemShow)
 
 	// Standard middleware managed by alice with some custom middlewares
 	// standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)

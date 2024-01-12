@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -98,11 +97,14 @@ func (s *S3) GetFileUrl(key string) string {
 	if err != nil {
 		log.Println(err)
 	}
-	bucketEndpoint := fmt.Sprintf("%s.%s", s.Bucket, *s.Session.Config.Endpoint)
 
+	return url
+}
+
+func (s *S3) ProxyImageUrl(key string) string {
 	if s.EnableCdn {
-		return strings.Replace(url, bucketEndpoint, s.CdnHost, 1)
+		return fmt.Sprintf("https://%s/images/%s", s.CdnHost, key)
 	} else {
-		return url
+		return fmt.Sprintf("/images/%s", key)
 	}
 }

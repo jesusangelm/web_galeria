@@ -67,7 +67,7 @@ func (m *ItemModel) Get(id int64) (*Item, error) {
 			return nil, err
 		}
 	}
-	url := m.S3Manager.GetFileUrl(item.ItemAttachment.Key)
+	url := m.S3Manager.ProxyImageUrl(item.ItemAttachment.Key)
 	item.ImageURL = url
 
 	return &item, nil

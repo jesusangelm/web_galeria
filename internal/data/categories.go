@@ -92,7 +92,7 @@ func (m *CategoryModel) Get(id int64) (*Category, error) {
 			return nil, err
 		}
 
-		url := m.S3Manager.GetFileUrl(item.ItemAttachment.Key)
+		url := m.S3Manager.ProxyImageUrl(item.ItemAttachment.Key)
 		item.ImageURL = url
 
 		items = append(items, &item)

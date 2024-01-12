@@ -3,8 +3,6 @@ module jesusmarin.dev/galeria
 go 1.20
 
 require (
-	github.com/alexedwards/scs/pgxstore v0.0.0-20230327161757-10d4299e3b24
-	github.com/alexedwards/scs/v2 v2.5.1
 	github.com/aws/aws-sdk-go v1.45.6
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/julienschmidt/httprouter v1.3.0
