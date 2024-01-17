@@ -18,6 +18,8 @@ type Category struct {
 	CreatedAt   time.Time
 	Items       []*Item
 	ItemsCount  int64
+	ImageKey    string
+	ImageURL    string
 }
 
 type CategoryModel struct {
@@ -106,14 +108,23 @@ func (m *CategoryModel) Get(id int64) (*Category, error) {
 func (m *CategoryModel) List() ([]*Category, error) {
 	// TODO: Add pagination support.
 	query := `
-		SELECT
-			categories.id, categories.name, categories.description,
-			categories.created_at, COUNT(items.id) AS items_count
+    SELECT
+      categories.id, categories.name, categories.description,
+      categories.created_at, COUNT(items.id) AS items_count,
+      COALESCE(
+        (SELECT item_attachments.key
+          FROM items
+					LEFT JOIN item_attachments ON items.id = item_attachments.item_id
+					WHERE items.category_id = categories.id
+					limit 1
+        ), ''
+      ) as image_key
 		FROM categories
 		LEFT JOIN items ON categories.id = items.category_id
+		LEFT JOIN item_attachments ON items.id = item_attachments.item_id
 		GROUP BY categories.id
 		ORDER BY categories.created_at DESC
-	`
+  `
 	// 3 seconds timeout for quering the DB
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -133,10 +144,13 @@ func (m *CategoryModel) List() ([]*Category, error) {
 			&category.Description,
 			&category.CreatedAt,
 			&category.ItemsCount,
+			&category.ImageKey,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		category.ImageURL = m.S3Manager.ProxyImageUrl(category.ImageKey)
 
 		categories = append(categories, &category)
 	}

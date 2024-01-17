@@ -102,6 +102,10 @@ func (s *S3) GetFileUrl(key string) string {
 }
 
 func (s *S3) ProxyImageUrl(key string) string {
+	if key == "" {
+		return ""
+	}
+
 	if s.EnableCdn {
 		return fmt.Sprintf("https://%s/images/%s", s.CdnHost, key)
 	} else {
