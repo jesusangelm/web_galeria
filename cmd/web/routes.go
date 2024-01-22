@@ -20,7 +20,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/images/:key", app.images)
 
 	// Routes definition
-	router.HandlerFunc(http.MethodGet, "/", app.home)
+	router.HandlerFunc(http.MethodGet, "/", app.listCategories)
 	router.HandlerFunc(http.MethodGet, "/category/:id", app.categoryShow)
 	router.HandlerFunc(http.MethodGet, "/item/:id", app.itemShow)
 

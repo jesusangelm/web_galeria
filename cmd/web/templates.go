@@ -18,6 +18,7 @@ type templateData struct {
 	Categories  []*data.Category
 	Item        *data.Item
 	Items       []*data.Item
+	Metadata    data.Metadata
 }
 
 // Create a humanDate function which returns a nicely formatted string
@@ -26,11 +27,21 @@ func humanDate(t time.Time) string {
 	return t.Format("02 jan 2006 at 15:04")
 }
 
+func add(a, b int) int {
+	return a + b
+}
+
+func sust(a, b int) int {
+	return a - b
+}
+
 // Initialize a template.FuncMap object and store it in a global variable. This is
 // essentially a string-keyed map which acts as a lookup between the names of our
 // custom template functions and the functions themselves.
 var functions = template.FuncMap{
 	"humanDate": humanDate,
+	"add":       add,
+	"sust":      sust,
 }
 
 // function for read and copy all .tmpl templates in a map variable stored in memory.

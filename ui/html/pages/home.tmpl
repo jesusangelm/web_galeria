@@ -24,4 +24,24 @@
     </div>
   </div>
 
+  <div class="container">
+    {{if ne .Metadata.CurrentPage .Metadata.FirstPage }}
+      <a class="btn btn-secondary btn-sm" href="/?page=1">Inicio</a>
+    {{end}}
+
+    {{if gt (sust .Metadata.CurrentPage 1) 0  }}
+      <a class="btn btn-secondary btn-sm" href="/?page={{sust .Metadata.CurrentPage 1}}">Anterior</a>
+    {{end}}
+
+    <span>Pagina {{.Metadata.CurrentPage}} de {{.Metadata.LastPage}}</span>
+
+    {{if le (add .Metadata.CurrentPage 1) .Metadata.LastPage  }}
+      <a class="btn btn-secondary btn-sm" href="/?page={{add .Metadata.CurrentPage 1}}">Siguiente</a>
+    {{end}}
+
+    {{if ne .Metadata.CurrentPage .Metadata.LastPage}}
+      <a class="btn btn-secondary btn-sm" href="/?page={{.Metadata.LastPage}}">Fin</a>
+    {{end}}
+  </div>
+
 {{end}}
