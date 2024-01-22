@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -28,9 +29,9 @@ type CategoryModel struct {
 }
 
 // Return a single category based on the ID given
-func (m *CategoryModel) Get(id int64) (*Category, error) {
+func (m *CategoryModel) Get(id int64, filters Filters) (*Category, Metadata, error) {
 	if id < 1 {
-		return nil, ErrRecordNotFound
+		return nil, Metadata{}, ErrRecordNotFound
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -57,32 +58,40 @@ func (m *CategoryModel) Get(id int64) (*Category, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, pgx.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, Metadata{}, ErrRecordNotFound
 		default:
-			return nil, err
+			return nil, Metadata{}, err
 		}
 	}
 
 	// query to get the items in a given category
-	query = `
-		SELECT items.id, items.name, items.description, items.created_at,
+	query = fmt.Sprintf(`
+		SELECT count(*) OVER(), items.id, items.name, items.description, items.created_at,
 				COALESCE(item_attachments.key, '') as key,
 				COALESCE(item_attachments.filename, '') as filename
 		FROM items
 		LEFT JOIN item_attachments ON items.id = item_attachments.item_id
 		WHERE items.category_id = $1
-		ORDER BY items.created_at DESC
-	`
-	rows, err := m.DB.Query(ctx, query, id)
+		ORDER BY %s %s, id ASC
+		LIMIT $2
+		OFFSET $3
+	`, filters.sortColumn(), filters.sortDirection())
+
+	args := []any{id, filters.limit(), filters.offset()}
+
+	rows, err := m.DB.Query(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	defer rows.Close()
 
 	var items []*Item
+	totalRecords := 0
+
 	for rows.Next() {
 		var item Item
 		err := rows.Scan(
+			&totalRecords,
 			&item.ID,
 			&item.Name,
 			&item.Description,
@@ -91,7 +100,7 @@ func (m *CategoryModel) Get(id int64) (*Category, error) {
 			&item.ItemAttachment.Filename,
 		)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 
 		url := m.S3Manager.ProxyImageUrl(item.ItemAttachment.Key)
@@ -101,15 +110,20 @@ func (m *CategoryModel) Get(id int64) (*Category, error) {
 	}
 	category.Items = items
 
-	return &category, nil
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return &category, metadata, nil
 }
 
 // Return a slice of categories.
-func (m *CategoryModel) List() ([]*Category, error) {
-	// TODO: Add pagination support.
-	query := `
+func (m *CategoryModel) List(name string, filters Filters) ([]*Category, Metadata, error) {
+	query := fmt.Sprintf(`
     SELECT
-      categories.id, categories.name, categories.description,
+      count(*) OVER(), categories.id, categories.name, categories.description,
       categories.created_at, COUNT(items.id) AS items_count,
       COALESCE(
         (SELECT item_attachments.key
@@ -122,23 +136,32 @@ func (m *CategoryModel) List() ([]*Category, error) {
 		FROM categories
 		LEFT JOIN items ON categories.id = items.category_id
 		LEFT JOIN item_attachments ON items.id = item_attachments.item_id
+  	WHERE (to_tsvector('simple', categories.name) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		GROUP BY categories.id
-		ORDER BY categories.created_at DESC
-  `
+		ORDER BY %s %s, id ASC
+		LIMIT $2
+		OFFSET $3
+  `, filters.sortColumn(), filters.sortDirection())
+
 	// 3 seconds timeout for quering the DB
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := m.DB.Query(ctx, query)
+	args := []any{name, filters.limit(), filters.offset()}
+
+	rows, err := m.DB.Query(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 	defer rows.Close()
 
+	totalRecords := 0
 	var categories []*Category
+
 	for rows.Next() {
 		var category Category
 		err := rows.Scan(
+			&totalRecords,
 			&category.ID,
 			&category.Name,
 			&category.Description,
@@ -147,13 +170,18 @@ func (m *CategoryModel) List() ([]*Category, error) {
 			&category.ImageKey,
 		)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 
 		category.ImageURL = m.S3Manager.ProxyImageUrl(category.ImageKey)
 
 		categories = append(categories, &category)
 	}
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
 
-	return categories, nil
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return categories, metadata, nil
 }

@@ -1,27 +1,47 @@
 {{define "title"}} Categoria {{.Category.Name}}{{end}}
 
 {{define "main"}}
-<section class="py-5 text-center container">
-  <div class="row py-lg-5">
-    <div class="col-lg-6 col-md-8 mx-auto">
-      <h1 class="fw-light">{{.Category.Name}}</h1>
-      <p class="lead text-muted">{{.Category.Description}}</p>
+  <section class="py-5 text-center container">
+    <div class="row py-lg-5">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">{{.Category.Name}}</h1>
+        <p class="lead text-muted">{{.Category.Description}}</p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<div class="album py-5">
-  <div class="container">
-    <h1 class="py-3">{{.Category.ItemsCount}} Items en la categoría {{.Category.Name}}</h1>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-      {{if .Category.Items}}
-        {{range .Category.Items}}
-          {{template "item" .}}
+  <div class="album py-5">
+    <div class="container">
+      <h1 class="py-3">{{.Category.ItemsCount}} Items en la categoría {{.Category.Name}}</h1>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        {{if .Category.Items}}
+          {{range .Category.Items}}
+            {{template "item" .}}
+          {{end}}
+        {{else}}
+          <p>No hay items para mostrar.</p>
         {{end}}
-      {{else}}
-        <p>No hay items para mostrar.</p>
-      {{end}}
+      </div>
     </div>
   </div>
-</div>
+
+  <div class="container">
+    {{if ne .Metadata.CurrentPage .Metadata.FirstPage }}
+      <a class="btn btn-secondary btn-sm" href="/category/{{.Category.ID}}?page=1">Inicio</a>
+    {{end}}
+
+    {{if gt (sust .Metadata.CurrentPage 1) 0  }}
+      <a class="btn btn-secondary btn-sm" href="/category/{{.Category.ID}}?page={{sust .Metadata.CurrentPage 1}}">Anterior</a>
+    {{end}}
+
+    <span>Pagina {{.Metadata.CurrentPage}} de {{.Metadata.LastPage}}</span>
+
+    {{if le (add .Metadata.CurrentPage 1) .Metadata.LastPage  }}
+      <a class="btn btn-secondary btn-sm" href="/category/{{.Category.ID}}?page={{add .Metadata.CurrentPage 1}}">Siguiente</a>
+    {{end}}
+
+    {{if ne .Metadata.CurrentPage .Metadata.LastPage}}
+      <a class="btn btn-secondary btn-sm" href="/category/{{.Category.ID}}?page={{.Metadata.LastPage}}">Fin</a>
+    {{end}}
+  </div>
 {{end}}
